@@ -1,4 +1,11 @@
 import { Theme } from '../types';
+import mountains from '../../images/Montagnes.avif';
+import ocean from '../../images/Ocean.avif';
+import forest from '../../images/Forest.avif';
+import city from '../../images/City.avif';
+import space from '../../images/Space.avif';
+import Delphin from '../../images/Delphin.avif';
+import earth from '../../images/earth1.avif';
 
 export const defaultThemes: Theme[] = [
   {
@@ -59,28 +66,38 @@ export const defaultThemes: Theme[] = [
 
 export const backgroundImages = [
   {
+    id: 'earth',
+    name: 'Terre',
+    url: earth,
+  },
+  {
     id: 'mountains',
     name: 'Montagnes',
-    url: 'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop',
+    url: mountains,
   },
   {
     id: 'ocean',
     name: 'Océan',
-    url: 'https://images.pexels.com/photos/1001682/pexels-photo-1001682.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop',
+    url: ocean,
   },
   {
     id: 'forest',
     name: 'Forêt',
-    url: 'https://images.pexels.com/photos/1671325/pexels-photo-1671325.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop',
+    url: forest,
   },
   {
     id: 'city',
     name: 'Ville',
-    url: 'https://images.pexels.com/photos/2422915/pexels-photo-2422915.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop',
+    url: city,
   },
   {
     id: 'space',
     name: 'Espace',
-    url: 'https://images.pexels.com/photos/1169754/pexels-photo-1169754.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop',
+    url: space,
+  },
+  {
+    id: 'delphin',
+    name: 'Delphin',
+    url: Delphin,
   },
 ];
