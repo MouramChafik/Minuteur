@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 import { Eye, EyeOff, Volume2, VolumeX } from "lucide-react";
 import rainSound from "../../dist/assets/rain.mp3";
 import forestSound from "../../dist/assets/forest.mp3";
@@ -10,11 +11,27 @@ interface FocusModeProps {
 }
 
 const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
-  const [isPlaying, setIsPlaying] = useState(true);
+  // Format mm:ss
+  function formatTime(seconds: number) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  }
+  const [isPlaying, setIsPlaying] = useLocalStorage<boolean>(
+    "focusPlayerPlaying",
+    true
+  );
   const [audioProgress, setAudioProgress] = useState(0);
-  const [isActive, setIsActive] = useState(false);
-  const [ambientSound, setAmbientSound] = useState<string>("none");
-  const [volume, setVolume] = useState(50);
+  const [audioTime, setAudioTime] = useState({ current: 0, duration: 0 });
+  const [isActive, setIsActive] = useLocalStorage<boolean>(
+    "focusModeActive",
+    false
+  );
+  const [ambientSound, setAmbientSound] = useLocalStorage<string>(
+    "focusPlayerAmbientSound",
+    "none"
+  );
+  const [volume, setVolume] = useLocalStorage<number>("focusPlayerVolume", 50);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(
     null
   );
@@ -29,6 +46,12 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
   ];
 
   useEffect(() => {
+    // Arrêter l'ancien audio avant d'en créer un nouveau
+    if (audioElement) {
+      audioElement.pause();
+      setAudioElement(null);
+    }
+
     if (isActive && ambientSound !== "none") {
       const sound = ambientSounds.find((s) => s.id === ambientSound);
       if (sound && sound.url) {
@@ -57,13 +80,15 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
         audio.ontimeupdate = () => {
           if (audio.duration > 0) {
             setAudioProgress((audio.currentTime / audio.duration) * 100);
+            setAudioTime({
+              current: audio.currentTime,
+              duration: audio.duration,
+            });
           }
         };
         setAudioElement(audio);
       }
-    } else if (audioElement) {
-      audioElement.pause();
-      setAudioElement(null);
+    } else {
       setAudioError(null);
       setIsPlaying(false);
       setAudioProgress(0);
@@ -101,6 +126,7 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
   };
 
   const quotes = [
+    "Fermez les yeux et respirez profondément.",
     "La concentration est la clé de la force mentale.",
     "Un esprit concentré est un esprit puissant.",
     "La distraction est l'ennemi de la profondeur.",
@@ -115,7 +141,7 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentQuote(quotes[Math.floor(Math.random() * quotes.length)]);
-    }, 30000); // Change quote every 30 seconds
+    }, 10000); // Change quote every 10 seconds
 
     return () => clearInterval(interval);
   }, []);
@@ -256,6 +282,13 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
                         className="w-full"
                         style={{ accentColor: theme.primary }}
                       />
+                      <span className="ml-2 text-xs text-white/70 min-w-[60px] text-right">
+                        {audioTime.duration > 0
+                          ? `${formatTime(
+                              audioTime.duration - audioTime.current
+                            )} restantes`
+                          : ""}
+                      </span>
                     </div>
                   )}
                 </div>
