@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { Eye, EyeOff, Volume2, VolumeX } from "lucide-react";
+import { Eye, Pause, Play, Music, VolumeX } from "lucide-react";
 import rainSound from "../../dist/assets/rain.mp3";
 import forestSound from "../../dist/assets/forest.mp3";
 import oceanSound from "../../dist/assets/ocean.mp3";
 import pianoSound from "../../dist/assets/Piano.mp3";
+import focusPicture from "../../images/focus.avif";
 
 interface FocusModeProps {
   theme: any;
@@ -46,80 +47,96 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
   ];
 
   useEffect(() => {
-    // Arrêter l'ancien audio avant d'en créer un nouveau
+  // Cleanup function pour arrêter l'audio précédent
+  return () => {
     if (audioElement) {
       audioElement.pause();
-      setAudioElement(null);
+      audioElement.currentTime = 0;
+      audioElement.src = ''; // Important: libère la ressource
     }
+  };
+}, [isActive, ambientSound, volume, audioElement]); // Ajoutez audioElement dans les dépendances
 
-    if (isActive && ambientSound !== "none") {
-      const sound = ambientSounds.find((s) => s.id === ambientSound);
-      if (sound && sound.url) {
-        const audio = new Audio(sound.url);
-        audio.loop = true;
-        audio.volume = volume / 100;
-        audio.onerror = () => {
-          setAudioError(
-            "Impossible de charger le son d'ambiance. Veuillez vérifier le fichier audio."
-          );
-          createWhiteNoise();
-        };
-        audio
-          .play()
-          .then(() => {
-            setAudioError(null);
-            setIsPlaying(true);
-          })
-          .catch(() => {
-            setAudioError(
-              "Impossible de lire le son d'ambiance. Fallback bruit blanc activé."
-            );
-            createWhiteNoise();
-            setIsPlaying(false);
-          });
-        audio.ontimeupdate = () => {
-          if (audio.duration > 0) {
-            setAudioProgress((audio.currentTime / audio.duration) * 100);
-            setAudioTime({
-              current: audio.currentTime,
-              duration: audio.duration,
-            });
-          }
-        };
-        setAudioElement(audio);
-      }
-    } else {
-      setAudioError(null);
+useEffect(() => {
+  if (!isActive) {
+    // Arrêter l'audio si le mode focus est désactivé
+    if (audioElement) {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      setAudioElement(null);
       setIsPlaying(false);
       setAudioProgress(0);
     }
+    return;
+  }
 
-    return () => {
-      if (audioElement) {
-        audioElement.pause();
+  if (ambientSound === "none") {
+    // Arrêter l'audio si "Aucun" est sélectionné
+    if (audioElement) {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      setAudioElement(null);
+    }
+    setIsPlaying(false);
+    setAudioProgress(0);
+    return;
+  }
+
+  // Créer un nouvel audio seulement si nécessaire
+  const sound = ambientSounds.find((s) => s.id === ambientSound);
+  if (sound && sound.url) {
+    const audio = new Audio(sound.url);
+    audio.loop = true;
+    audio.volume = volume / 100;
+    
+    audio.onerror = () => {
+      setAudioError("Choisissez un son, s’il vous plaît, ou rafraîchissez la page en cas d’erreur.");
+    };
+    
+    audio.play()
+      .then(() => {
+        setAudioError(null);
+        setIsPlaying(true);
+      })
+      .catch(() => {
+        setAudioError("Choisissez un son, s’il vous plaît.");
+        setIsPlaying(false);
+      });
+    
+    audio.ontimeupdate = () => {
+      if (audio.duration > 0) {
+        setAudioProgress((audio.currentTime / audio.duration) * 100);
+        setAudioTime({
+          current: audio.currentTime,
+          duration: audio.duration,
+        });
       }
     };
-  }, [isActive, ambientSound, volume]);
+    
+    setAudioElement(audio);
+  }
+}, [isActive, ambientSound, volume]);
 
-  const createWhiteNoise = () => {
-    const audioContext = new (window.AudioContext ||
-      (window as any).webkitAudioContext)();
-    const bufferSize = 4096;
-    const whiteNoise = audioContext.createScriptProcessor(bufferSize, 1, 1);
 
-    whiteNoise.onaudioprocess = (e) => {
-      const output = e.outputBuffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
-      }
-    };
+  // const createWhiteNoise = () => {
+  //   const audioContext = new (window.AudioContext ||
+  //     (window as any).webkitAudioContext)();
+  //   const bufferSize = 4096;
+  //   const whiteNoise = audioContext.createScriptProcessor(bufferSize, 1, 1);
 
-    const gainNode = audioContext.createGain();
-    gainNode.gain.value = (volume / 100) * 0.1; // Lower volume for white noise
+  //   whiteNoise.onaudioprocess = (e) => {
+  //     const output = e.outputBuffer.getChannelData(0);
+  //     for (let i = 0; i < bufferSize; i++) {
+  //       output[i] = Math.random() * 2 - 1;
+  //     }
+  //   };
 
-    whiteNoise.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-  };
+  //   const gainNode = audioContext.createGain();
+  //   gainNode.gain.value = (volume / 100) * 0.1; // Lower volume for white noise
+
+  //   whiteNoise.connect(gainNode);
+  //   gainNode.connect(audioContext.destination);
+  // };
 
   const toggleFocusMode = () => {
     setIsActive(!isActive);
@@ -138,6 +155,15 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
 
   const [currentQuote, setCurrentQuote] = useState(quotes[0]);
 
+   useEffect(() => {
+      if (audioError) {
+        const timer = setTimeout(() => {
+          setAudioError(null);
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+   }, [audioError]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentQuote(quotes[Math.floor(Math.random() * quotes.length)]);
@@ -149,7 +175,7 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
   return (
     <div className="w-full max-w-md mx-auto">
       {audioError && (
-        <div className="bg-red-500 text-white rounded-xl p-3 mb-4 text-center">
+        <div className="bg-red-500 backdrop-blur-lg text-white rounded-xl p-3 mb-4 text-center animate-slideIn">
           {audioError}
         </div>
       )}
@@ -163,7 +189,9 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
       {!isActive ? (
         <div className="space-y-6">
           <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 text-center">
-            <div className="text-6xl mb-4">🧘‍♂️</div>
+            <div className="text-6xl mb-4">
+              <img src={focusPicture} alt="Focus Mode" className="w-32 h-32 mx-auto mb-4 rounded-full" />
+            </div>
             <h2 className="text-2xl font-bold text-white mb-4">
               Prêt à vous concentrer ?
             </h2>
@@ -240,7 +268,7 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
               {ambientSound !== "none" && (
                 <div className="flex flex-col items-center space-y-2">
                   <div className="flex items-center space-x-2">
-                    <Volume2 className="w-5 h-5 text-white/60" />
+                    <Music className="w-5 h-5 text-white/60" />
                     <span className="text-white/80 text-sm">
                       {ambientSounds.find((s) => s.id === ambientSound)?.name}
                     </span>
@@ -261,9 +289,9 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
                         title={isPlaying ? "Pause" : "Lecture"}
                       >
                         {isPlaying ? (
-                          <VolumeX className="w-5 h-5" />
+                          <Pause className="w-5 h-5" />
                         ) : (
-                          <Volume2 className="w-5 h-5" />
+                          <Play className="w-5 h-5" />
                         )}
                       </button>
                       <input

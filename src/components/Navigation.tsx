@@ -13,7 +13,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange, theme }
     { id: 'pomodoro', name: 'Pomodoro', icon: Clock },
     { id: 'todo', name: 'Tâches', icon: CheckSquare },
     { id: 'notes', name: 'Notes', icon: FileText },
-    { id: 'focus', name: 'Relax', icon: Brain },
+    { id: 'focus', name: 'Focus', icon: Brain },
     { id: 'settings', name: 'Paramètres', icon: Settings },
   ];
 

@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Play, Pause, RotateCcw, Plus, Minus } from 'lucide-react';
-import { TimerState } from '../types';
-import cartoon from '../../dist/assets/cartoon.mp3';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Play, Pause, RotateCcw, Plus, Minus } from "lucide-react";
+import { TimerState } from "../types";
+import cartoon from "../../dist/assets/cartoon.mp3";
 
 interface TimerProps {
   theme: any;
@@ -10,64 +10,71 @@ interface TimerProps {
 
 const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
   const [timer, setTimer] = useState<TimerState>({
-    minutes: 5,
-    seconds: 0,
-    totalSeconds: 300,
+    minutes: 1,
+    seconds: 30,
+    totalSeconds: 90,
     isRunning: false,
     isFinished: false,
   });
 
-  const [initialTime, setInitialTime] = useState(300);
-  const [inputMinutes, setInputMinutes] = useState(5);
-  const [inputSeconds, setInputSeconds] = useState(0);
+  const [initialTime, setInitialTime] = useState(90);
+  const [inputMinutes, setInputMinutes] = useState(1);
+  const [inputSeconds, setInputSeconds] = useState(30);
   const [showCelebration, setShowCelebration] = useState(false);
   const intervalRef = useRef<number | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
 
   const initAudioContext = useCallback(() => {
     if (!audioContextRef.current && soundEnabled) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      audioContextRef.current = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
     }
   }, [soundEnabled]);
 
-  const playBeep = useCallback((frequency: number = 800, duration: number = 200) => {
-    if (!soundEnabled) return;
-    initAudioContext();
-    if (!audioContextRef.current) return;
+  const playBeep = useCallback(
+    (frequency: number = 800, duration: number = 200) => {
+      if (!soundEnabled) return;
+      initAudioContext();
+      if (!audioContextRef.current) return;
 
-    const oscillator = audioContextRef.current.createOscillator();
-    const gainNode = audioContextRef.current.createGain();
+      const oscillator = audioContextRef.current.createOscillator();
+      const gainNode = audioContextRef.current.createGain();
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContextRef.current.destination);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContextRef.current.destination);
 
-    oscillator.frequency.value = frequency;
-    oscillator.type = 'sine';
+      oscillator.frequency.value = frequency;
+      oscillator.type = "sine";
 
-    gainNode.gain.setValueAtTime(0.3, audioContextRef.current.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContextRef.current.currentTime + duration / 1000);
+      gainNode.gain.setValueAtTime(0.3, audioContextRef.current.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.01,
+        audioContextRef.current.currentTime + duration / 1000
+      );
 
-    oscillator.start(audioContextRef.current.currentTime);
-    oscillator.stop(audioContextRef.current.currentTime + duration / 1000);
-  }, [initAudioContext, soundEnabled]);
+      oscillator.start(audioContextRef.current.currentTime);
+      oscillator.stop(audioContextRef.current.currentTime + duration / 1000);
+    },
+    [initAudioContext, soundEnabled]
+  );
 
   const playVictoryMelody = useCallback(() => {
     if (!soundEnabled) return;
 
     // Create audio element with your sound file
     const audio = new Audio(cartoon); // Update this path
-    
+
     // Set volume
     audio.volume = 0.4;
-    
+
     // Play the sound
-    audio.play().catch(error => {
-      console.error('Error playing victory sound:', error);
+    audio.play().catch((error) => {
+      console.error("Error playing victory sound:", error);
     });
   }, [soundEnabled]);
 
   const updateTimer = useCallback(() => {
-    setTimer(prev => {
+    setTimer((prev) => {
       if (prev.totalSeconds <= 1) {
         setShowCelebration(true);
         playVictoryMelody();
@@ -135,7 +142,7 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
       reset();
       return;
     }
-    setTimer(prev => ({ ...prev, isRunning: !prev.isRunning }));
+    setTimer((prev) => ({ ...prev, isRunning: !prev.isRunning }));
     initAudioContext();
   };
 
@@ -159,7 +166,7 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
   const adjustSeconds = (delta: number) => {
     let newSeconds = inputSeconds + delta;
     let newMinutes = inputMinutes;
-    
+
     if (newSeconds >= 60) {
       newSeconds = 0;
       newMinutes = Math.min(59, newMinutes + 1);
@@ -167,14 +174,14 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
       newSeconds = 59;
       newMinutes = Math.max(0, newMinutes - 1);
     }
-    
+
     if (newMinutes === 0 && newSeconds === 0) {
       newSeconds = 1;
     }
-    
+
     setInputMinutes(newMinutes);
     setInputSeconds(newSeconds);
-    
+
     const totalSeconds = newMinutes * 60 + newSeconds;
     setTimer({
       minutes: newMinutes,
@@ -186,45 +193,50 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
     setInitialTime(totalSeconds);
   };
 
-  const progress = initialTime > 0 ? ((initialTime - timer.totalSeconds) / initialTime) * 100 : 0;
+  const progress =
+    initialTime > 0
+      ? ((initialTime - timer.totalSeconds) / initialTime) * 100
+      : 0;
   const circumference = 2 * Math.PI * 120;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   const getCircleColor = () => {
     if (timer.totalSeconds <= 5) {
-      return '#ef4444';
+      return "#ef4444";
     } else if (progress < 50) {
-      return '#ffffff';
+      return "#ffffff";
     } else if (progress < 90) {
-      return '#22c55e';
+      return "#22c55e";
     } else {
-      return '#ef4444';
+      return "#ef4444";
     }
   };
 
   const getProgressBarColor = () => {
     if (timer.totalSeconds <= 5) {
-      return 'from-red-500 to-red-600';
+      return "from-red-500 to-red-600";
     } else if (progress < 50) {
-      return 'from-white to-gray-200';
+      return "from-white to-gray-200";
     } else if (progress < 90) {
-      return 'from-green-500 to-green-600';
+      return "from-green-500 to-green-600";
     } else {
-      return 'from-red-500 to-red-600';
+      return "from-red-500 to-red-600";
     }
   };
 
   const formatTime = (minutes: number, seconds: number) => {
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const quickTimes = [
-    { label: '30s', minutes: 0, seconds: 30 },
-    { label: '1m', minutes: 1, seconds: 0 },
-    { label: '2m', minutes: 2, seconds: 0 },
-    { label: '5m', minutes: 5, seconds: 0 },
-    { label: '10m', minutes: 10, seconds: 0 },
-    { label: '15m', minutes: 15, seconds: 0 },
+    { label: "30s", minutes: 0, seconds: 30 },
+    { label: "1m", minutes: 1, seconds: 0 },
+    { label: "2m", minutes: 2, seconds: 0 },
+    { label: "5m", minutes: 5, seconds: 0 },
+    { label: "10m", minutes: 10, seconds: 0 },
+    { label: "15m", minutes: 15, seconds: 0 },
   ];
 
   return (
@@ -233,7 +245,9 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
           <div className="text-center animate-bounce">
             <div className="text-9xl mb-4">⏱️</div>
-            <div className="text-7xl font-bold text-white mb-2 animate-pulse">Temps écoulé!</div>
+            <div className="text-7xl font-bold text-white mb-2 animate-pulse">
+              Temps écoulé!
+            </div>
             {/* <div className="text-5xl" style={{ color: theme.accent }}>Votre réponse,</div>
             <div className="text-4xl" style={{ color: theme.accent }}>s'il vous plaît.</div> */}
           </div>
@@ -257,12 +271,17 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
 
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-white mb-2">Minuteur</h1>
-        <p style={{ color: theme.accent }}>Minuteur personnalisable avec effets sonores</p>
+        <p style={{ color: theme.accent }}>
+          Minuteur personnalisable avec effets sonores
+        </p>
       </div>
 
       <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 mb-6">
         <div className="relative w-64 h-64 mx-auto mb-8">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 256 256">
+          <svg
+            className="w-full h-full transform -rotate-90"
+            viewBox="0 0 256 256"
+          >
             <circle
               cx="128"
               cy="128"
@@ -283,22 +302,31 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
               strokeDashoffset={strokeDashoffset}
               className="transition-all duration-1000 ease-in-out"
               style={{
-                filter: timer.totalSeconds <= 5 ? 'drop-shadow(0 0 10px #ef44440)' : 'none',
+                filter:
+                  timer.totalSeconds <= 5
+                    ? "drop-shadow(0 0 10px #ef44440)"
+                    : "none",
               }}
             />
           </svg>
-          
+
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
-              <div 
+              <div
                 className={`text-6xl font-mono font-bold transition-all duration-300 ${
-                  timer.totalSeconds <= 5 ? 'animate-pulse text-red-400' : 'text-white'
+                  timer.totalSeconds <= 5
+                    ? "animate-pulse text-red-400"
+                    : "text-white"
                 }`}
               >
                 {formatTime(timer.minutes, timer.seconds)}
               </div>
               <div style={{ color: theme.accent }} className="text-sm mt-2">
-                {timer.isRunning ? 'En cours...' : timer.isFinished ? 'Terminé!' : 'Prêt'}
+                {timer.isRunning
+                  ? "En cours..."
+                  : timer.isFinished
+                  ? "Terminé!"
+                  : "Prêt"}
               </div>
             </div>
           </div>
@@ -309,7 +337,11 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
             onClick={toggleTimer}
             className="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-105 shadow-lg"
             style={{
-              backgroundColor: timer.isRunning ? '#f97316' : timer.isFinished ? '#22c55e' : theme.primary,
+              backgroundColor: timer.isRunning
+                ? "#f97316"
+                : timer.isFinished
+                ? "#22c55e"
+                : theme.primary,
             }}
           >
             {timer.isRunning ? (
@@ -318,7 +350,7 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
               <Play className="w-6 h-6 text-white ml-1" />
             )}
           </button>
-          
+
           <button
             onClick={reset}
             className="w-16 h-16 rounded-full bg-slate-600 hover:bg-slate-700 flex items-center justify-center transition-all duration-200 transform hover:scale-105 shadow-lg"
@@ -371,13 +403,22 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
                   key={index}
                   onClick={() => setTime(time.minutes, time.seconds)}
                   className={`py-2 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    inputMinutes === time.minutes && inputSeconds === time.seconds
-                      ? 'text-white shadow-lg'
-                      : 'bg-white/10 hover:bg-white/20'
+                    inputMinutes === time.minutes &&
+                    inputSeconds === time.seconds
+                      ? "text-white shadow-lg"
+                      : "bg-white/10 hover:bg-white/20"
                   }`}
                   style={{
-                    backgroundColor: inputMinutes === time.minutes && inputSeconds === time.seconds ? theme.primary : undefined,
-                    color: inputMinutes === time.minutes && inputSeconds === time.seconds ? 'white' : theme.accent,
+                    backgroundColor:
+                      inputMinutes === time.minutes &&
+                      inputSeconds === time.seconds
+                        ? theme.primary
+                        : undefined,
+                    color:
+                      inputMinutes === time.minutes &&
+                      inputSeconds === time.seconds
+                        ? "white"
+                        : theme.accent,
                   }}
                 >
                   {time.label}
