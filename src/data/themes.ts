@@ -1,9 +1,9 @@
 import { Theme } from '../types';
 import mountains from '../../images/Montagnes.avif';
 import ocean from '../../images/ocean.avif';
-import forest from '../../images/Forest.avif';
-import city from '../../images/City.avif';
-import space from '../../images/Space.avif';
+import forest from '../../images/forest.avif';
+import city from '../../images/city.avif';
+import space from '../../images/space.avif';
 import Delphin from '../../images/Delphin.avif';
 import earth from '../../images/earth1.avif';
 
