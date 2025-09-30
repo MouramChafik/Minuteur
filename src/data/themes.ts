@@ -1,6 +1,6 @@
 import { Theme } from '../types';
 import mountains from '../../images/Montagnes.avif';
-import ocean from '../../images/Ocean.avif';
+import ocean from '../../images/ocean.avif';
 import forest from '../../images/Forest.avif';
 import city from '../../images/City.avif';
 import space from '../../images/Space.avif';
