@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { Eye, Pause, Play, Music, VolumeX } from "lucide-react";
-import rainSound from "../../dist/assets/rain.mp3";
-import forestSound from "../../dist/assets/forest.mp3";
-import oceanSound from "../../dist/assets/ocean.mp3";
-import pianoSound from "../../dist/assets/Piano.mp3";
+import rainSound from "../../dist/assets/rain-C1AV7A97.mp3";
+import forestSound from "../../dist/assets/forest-BBv2BI4D.mp3";
+import oceanSound from "../../dist/assets/ocean-tnnZU04n.mp3";
+import pianoSound from "../../dist/assets/Piano-Cr-BNc1r.mp3";
 import focusPicture from "../../images/focus.avif";
 
 interface FocusModeProps {
