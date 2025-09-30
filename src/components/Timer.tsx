@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Play, Pause, RotateCcw, Plus, Minus } from "lucide-react";
 import { TimerState } from "../types";
-import cartoon from "../../dist/assets/cartoon-IO5EDRjR.mp3";
+import cartoon from "../../assets/cartoon-IO5EDRjR.mp3";
 
 interface TimerProps {
   theme: any;
