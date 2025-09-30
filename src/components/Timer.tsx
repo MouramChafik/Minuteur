@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Plus, Minus } from 'lucide-react';
 import { TimerState } from '../types';
+import cartoon from '../../dist/assets/cartoon.mp3';
 
 interface TimerProps {
   theme: any;
@@ -52,38 +53,18 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
 
   const playVictoryMelody = useCallback(() => {
     if (!soundEnabled) return;
-    initAudioContext();
-    if (!audioContextRef.current) return;
 
-    const notes = [
-      { freq: 523.25, time: 0 },
-      { freq: 659.25, time: 0.2 },
-      { freq: 783.99, time: 0.4 },
-      { freq: 1046.5, time: 0.6 },
-      { freq: 1046.5, time: 0.8 },
-    ];
-
-    notes.forEach(({ freq, time }) => {
-      const oscillator = audioContextRef.current!.createOscillator();
-      const gainNode = audioContextRef.current!.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContextRef.current!.destination);
-
-      oscillator.frequency.value = freq;
-      oscillator.type = 'triangle';
-
-      const startTime = audioContextRef.current!.currentTime + time;
-      const duration = time === 0.8 ? 0.4 : 0.15;
-
-      gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(0.4, startTime + 0.01);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
-
-      oscillator.start(startTime);
-      oscillator.stop(startTime + duration);
+    // Create audio element with your sound file
+    const audio = new Audio(cartoon); // Update this path
+    
+    // Set volume
+    audio.volume = 0.4;
+    
+    // Play the sound
+    audio.play().catch(error => {
+      console.error('Error playing victory sound:', error);
     });
-  }, [initAudioContext, soundEnabled]);
+  }, [soundEnabled]);
 
   const updateTimer = useCallback(() => {
     setTimer(prev => {
@@ -251,10 +232,10 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
       {showCelebration && (
         <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
           <div className="text-center animate-bounce">
-            <div className="text-6xl mb-4">🎉</div>
-            <div className="text-4xl font-bold text-white mb-2 animate-pulse">Temps écoulé!</div>
-            <div className="text-xl" style={{ color: theme.accent }}>Votre réponse,</div>
-            <div className="text-xl" style={{ color: theme.accent }}>s'il vous plaît.</div>
+            <div className="text-9xl mb-4">⏱️</div>
+            <div className="text-7xl font-bold text-white mb-2 animate-pulse">Temps écoulé!</div>
+            {/* <div className="text-5xl" style={{ color: theme.accent }}>Votre réponse,</div>
+            <div className="text-4xl" style={{ color: theme.accent }}>s'il vous plaît.</div> */}
           </div>
           <div className="absolute inset-0">
             {[...Array(20)].map((_, i) => (
@@ -302,7 +283,7 @@ const Timer: React.FC<TimerProps> = ({ theme, soundEnabled }) => {
               strokeDashoffset={strokeDashoffset}
               className="transition-all duration-1000 ease-in-out"
               style={{
-                filter: timer.totalSeconds <= 5 ? 'drop-shadow(0 0 10px #ef4444)' : 'none',
+                filter: timer.totalSeconds <= 5 ? 'drop-shadow(0 0 10px #ef44440)' : 'none',
               }}
             />
           </svg>

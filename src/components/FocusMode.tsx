@@ -282,7 +282,7 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
                         className="w-full"
                         style={{ accentColor: theme.primary }}
                       />
-                      <span className="ml-2 text-xs text-white/70 min-w-[60px] text-right">
+                      <span className="ml-2 text-xs text-white/70 min-w-[60px] ">
                         {audioTime.duration > 0
                           ? `${formatTime(
                               audioTime.duration - audioTime.current
@@ -299,7 +299,7 @@ const FocusMode: React.FC<FocusModeProps> = ({ theme }) => {
               onClick={toggleFocusMode}
               className="w-full py-4 px-6 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium transition-all duration-200 hover:scale-105 flex items-center justify-center space-x-2"
             >
-              <EyeOff className="w-5 h-5" />
+              <VolumeX className="w-5 h-5" />
               <span>Désactiver le mode focus</span>
             </button>
           </div>
